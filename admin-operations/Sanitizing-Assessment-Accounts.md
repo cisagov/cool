@@ -295,10 +295,12 @@ The fix is to re-drive the deletion with a working role instead of the
 stack's broken one:
 
 1. Retry the deletion, supplying an administrative CloudFormation service
-   role to override the one recorded on the stack:
+   role to override the one recorded on the stack. Use the sanitization
+   profile (`ProvisionAccount` cannot delete stacks) and the region the
+   stack actually lives in:
 
     ```console
-    AWS_DEFAULT_REGION=us-east-1 AWS_PROFILE=cool-env<X>-provisionaccount aws cloudformation delete-stack --stack-name <stack_name> --role-arn <admin_capable_cfn_role_arn>
+    AWS_DEFAULT_REGION=<stack_region> AWS_PROFILE=<sanitize_profile> aws cloudformation delete-stack --stack-name <stack_name> --role-arn <admin_capable_cfn_role_arn>
     ```
 
 1. If the underlying resources were already deleted out-of-band, you may
