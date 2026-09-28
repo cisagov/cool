@@ -270,9 +270,11 @@ unexpected in the kill list.
        often become deletable once their dependents are gone. Repeat the
        delete/dry-run cycle until the dry run is empty. If it stops making
        progress, contact the DevSecOps team.
-1. Check the DevSecOps team's list of aws-nuke-unsupported services and
-   manually verify (and clean, if needed) anything the engagement used
-   from that list.
+1. Manually check **every service** on the DevSecOps team's list of
+   aws-nuke-unsupported services, and clean up anything found. Do NOT
+   limit the check to services the engagement is known to have used —
+   out-of-band activity may be undocumented, and aws-nuke cannot discover
+   these resources for you.
 1. Attach the final dry-run output to the destroy-environment ticket, with
    every remaining entry (if any) annotated with its DevSecOps retention
    approval, along with documentation of the manual checks.
