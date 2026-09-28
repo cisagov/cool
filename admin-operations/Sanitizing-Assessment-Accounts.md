@@ -169,7 +169,7 @@ accounts:
 
 # COOL Dynamic accounts do not have IAM account aliases, so aws-nuke's
 # alias safety check must be bypassed for them (pair with the
-# --no-alias-verify CLI flag).
+# --no-alias-check CLI flag).
 bypass-alias-check-accounts:
   - "<env_account_id>"
 ```
@@ -192,7 +192,7 @@ unexpected in the kill list.
 1. Run aws-nuke in its default dry-run mode using the sanitization profile:
 
     ```console
-    aws-nuke run --config cool-aws-nuke.yaml --profile <sanitize_profile> --no-alias-verify
+    aws-nuke run --config cool-aws-nuke.yaml --profile <sanitize_profile> --no-alias-check
     ```
 
     **NOTE:** The `ProvisionAccount` role is scoped to provisioning and
@@ -204,11 +204,12 @@ unexpected in the kill list.
 
     **NOTE:** aws-nuke normally requires the target account to have an IAM
     account alias as a safety check, but COOL Dynamic accounts do not have
-    aliases. The `--no-alias-verify` flag and the config's
-    `bypass-alias-check-accounts` entry disable that check for this
-    account — which removes a guardrail, so triple-check that the account
-    ID in the config and the profile both point at the `env<X>` account
-    you intend to sanitize.
+    aliases. The `--no-alias-check` flag and the config's
+    `bypass-alias-check-accounts` entry relax that check to a synthesized
+    alias: the confirmation prompt asks you to type
+    `no-alias-<account_id>`. That embedded account ID is the guardrail —
+    verify it is the `env<X>` account you intend to sanitize before
+    typing it.
 1. Review the output. Every line is marked either `would remove` or
    `filtered`:
     1. Confirm that everything marked `filtered` is baseline (Control
@@ -225,12 +226,13 @@ unexpected in the kill list.
 1. Re-run with deletion enabled:
 
     ```console
-    aws-nuke run --config cool-aws-nuke.yaml --profile <sanitize_profile> --no-alias-verify --no-dry-run
+    aws-nuke run --config cool-aws-nuke.yaml --profile <sanitize_profile> --no-alias-check --no-dry-run
     ```
 
-1. Confirm at the prompts, verifying the account ID shown is the `env<X>`
-   account you intend to sanitize (with the alias check bypassed, the
-   account ID is your only confirmation signal).
+1. Confirm at the prompts by typing the synthesized alias
+   (`no-alias-<account_id>`), verifying the embedded account ID is the
+   `env<X>` account you intend to sanitize — with no real alias, that ID
+   is your only confirmation signal.
 1. Expect several minutes and some transient errors as aws-nuke works
    through resource dependencies. A single run is NOT guaranteed to remove
    everything: a resource can fail to delete because a dependent resource
