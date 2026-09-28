@@ -24,9 +24,15 @@ state. Anything created outside of `cool-assessment-terraform` survives it:
 Left in place, these leak information between engagements, accrue cost, and
 — in the case of half-deleted CloudFormation stacks — can wedge future
 cleanup. This runbook uses [aws-nuke](https://github.com/ekristen/aws-nuke)
-to enumerate everything in the account and delete all of it except a
-protected baseline (Control Tower, IAM Identity Center, and the COOL roles
-the account needs to be re-provisioned).
+to enumerate the account's resources and delete everything it recognizes
+except a protected baseline (Control Tower, IAM Identity Center, and the
+COOL roles the account needs to be re-provisioned).
+
+**NOTE:** aws-nuke does not support every AWS resource type, so a clean run
+means "clean within aws-nuke's coverage", not a guarantee that the account
+is empty. The DevSecOps team maintains a short list of services known to be
+unsupported and worth checking by hand (ask for it with the canonical
+config); anything found there is handled manually before closeout.
 
 **WARNING:** aws-nuke is a destructive tool by design. Never point it at any
 account other than the Dynamic account you are sanitizing, never run it
@@ -209,12 +215,18 @@ unexpected in the kill list.
 
 1. Edit the config so the `accounts` key names the account you are
    sanitizing (the account ID of `env<X>`).
-1. Run aws-nuke in its default dry-run mode using the environment's
-   provisioning profile:
+1. Run aws-nuke in its default dry-run mode using the sanitization profile:
 
     ```console
-    AWS_DEFAULT_REGION=us-east-1 aws-nuke run --config cool-aws-nuke.yaml --profile cool-env<X>-provisionaccount
+    aws-nuke run --config cool-aws-nuke.yaml --profile <sanitize_profile>
     ```
+
+    **NOTE:** The `ProvisionAccount` role is scoped to provisioning and
+    does not carry enumerate/delete permissions for every resource family
+    this sweep targets; running under it produces access-denied noise and
+    an unreliable verification. Use the dedicated sanitization role/profile
+    designated by the DevSecOps team, which must have administrative access
+    to the account.
 
     **NOTE:** aws-nuke requires the target account to have an IAM account
     alias and will prompt you to re-type it as a safety check.
@@ -234,7 +246,7 @@ unexpected in the kill list.
 1. Re-run with deletion enabled:
 
     ```console
-    AWS_DEFAULT_REGION=us-east-1 aws-nuke run --config cool-aws-nuke.yaml --profile cool-env<X>-provisionaccount --no-dry-run
+    aws-nuke run --config cool-aws-nuke.yaml --profile <sanitize_profile> --no-dry-run
     ```
 
 1. Type the account alias when prompted to confirm.
@@ -242,15 +254,25 @@ unexpected in the kill list.
    through resource dependencies. A single run is NOT guaranteed to remove
    everything: a resource can fail to delete because a dependent resource
    is removed later in the same run.
-1. When it completes, re-run the dry run from the previous section. The
-   `would remove` list should now be empty — this is the verification that
-   the account is clean.
+1. When it completes, review the run output for entries marked `failed`,
+   access-denied, or otherwise non-removable. Every such entry must be
+   either resolved (fix the cause and re-run) or explicitly reviewed with
+   the DevSecOps team, approved for retention, and documented in the
+   ticket — do NOT treat failures as ignorable noise.
+1. Re-run the dry run from the previous section. The `would remove` list
+   should now be empty — this, together with a failure-free deletion run,
+   is the verification that the account is clean (within aws-nuke's
+   resource-type coverage; see the note at the top of this page).
     1. If the list is not empty, re-run the deletion command; resources
        often become deletable once their dependents are gone. Repeat the
        delete/dry-run cycle until the dry run is empty. If it stops making
        progress, contact the DevSecOps team.
-1. Attach the final, empty dry-run output to the destroy-environment
-   ticket.
+1. Check the DevSecOps team's list of aws-nuke-unsupported services and
+   manually verify (and clean, if needed) anything the engagement used
+   from that list.
+1. Attach the final, empty dry-run output — plus documentation of any
+   approved retained failures and manual checks — to the
+   destroy-environment ticket.
 1. Only after a clean verification run should the account be marked
    "AVAILABLE FOR USE" in the COOL environment tracking spreadsheet.
 
