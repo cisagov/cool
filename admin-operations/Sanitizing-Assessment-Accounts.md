@@ -260,9 +260,12 @@ unexpected in the kill list.
    the DevSecOps team, approved for retention, and documented in the
    ticket — do NOT treat failures as ignorable noise.
 1. Re-run the dry run from the previous section. The `would remove` list
-   should now be empty — this, together with a failure-free deletion run,
-   is the verification that the account is clean (within aws-nuke's
-   resource-type coverage; see the note at the top of this page).
+   must now be empty **except for entries approved for retention in the
+   previous step** — approved exceptions satisfy the gate. This, together
+   with a deletion run whose only failures are those same approved
+   exceptions, is the verification that the account is clean (within
+   aws-nuke's resource-type coverage; see the note at the top of this
+   page).
     1. If the list is not empty, re-run the deletion command; resources
        often become deletable once their dependents are gone. Repeat the
        delete/dry-run cycle until the dry run is empty. If it stops making
@@ -270,9 +273,9 @@ unexpected in the kill list.
 1. Check the DevSecOps team's list of aws-nuke-unsupported services and
    manually verify (and clean, if needed) anything the engagement used
    from that list.
-1. Attach the final, empty dry-run output — plus documentation of any
-   approved retained failures and manual checks — to the
-   destroy-environment ticket.
+1. Attach the final dry-run output to the destroy-environment ticket, with
+   every remaining entry (if any) annotated with its DevSecOps retention
+   approval, along with documentation of the manual checks.
 1. Only after a clean verification run should the account be marked
    "AVAILABLE FOR USE" in the COOL environment tracking spreadsheet.
 
