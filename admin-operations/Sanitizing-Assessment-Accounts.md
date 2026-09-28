@@ -61,10 +61,12 @@ A starting point, to be reviewed against the current account baseline:
 
 ```yaml
 regions:
-  - global
-  - us-east-1
-  # Add any additional regions the engagement deployed to (see the
+  # "all" is the aws-nuke special value covering every enabled region;
+  # "global" covers non-regional services such as IAM. Scanning everything
+  # matters because engagements may deploy outside us-east-1 (see the
   # terraformer special case in Deleting Assessment Environments).
+  - global
+  - all
 
 blocklist:
   # Every non-Dynamic COOL account ID. Obtain the current list from the
@@ -99,6 +101,22 @@ presets:
       ConfigServiceDeliveryChannel:
         - type: glob
           value: "aws-controltower*"
+      EC2DHCPOption:
+        - type: glob
+          property: tag:Name
+          value: "aws-controltower-*"
+      EC2InternetGateway:
+        - type: glob
+          property: tag:Name
+          value: "aws-controltower-*"
+      EC2RouteTable:
+        - type: glob
+          property: tag:Name
+          value: "aws-controltower-*"
+      EC2Subnet:
+        - type: glob
+          property: tag:Name
+          value: "aws-controltower-*"
       EC2VPC:
         - type: exact
           property: tag:Name
@@ -123,9 +141,14 @@ presets:
         - type: glob
           property: RoleName
           value: "aws-controltower-*"
+        - type: exact
+          property: RoleName
+          value: "AWSControlTowerExecution"
+      # SAML providers are identified by their full ARN, so the pattern
+      # must match the whole ARN, not just the provider name.
       IAMSAMLProvider:
         - type: glob
-          value: "AWSSSO_*"
+          value: "arn:aws:iam::*:saml-provider/AWSSSO_*"
       LambdaFunction:
         - "aws-controltower-NotificationForwarder"
       SNSTopic:
@@ -143,10 +166,26 @@ presets:
         - type: glob
           value: "*SSMSession*"
         - "<security_scanner_role>"
-      IAMRolePolicyAttachment:
+      # Retaining a role is not enough: its inline policies and managed-
+      # policy attachments are separate aws-nuke resources and must be
+      # filtered too, or the sweep strips the role's permissions.
+      IAMRolePolicy:
         - type: glob
+          property: role:RoleName
+          value: "*SSMSession*"
+      IAMRolePolicyAttachment:
+        - type: exact
           property: RoleName
           value: "ProvisionAccount"
+        - type: exact
+          property: RoleName
+          value: "EC2ReadOnly"
+        - type: glob
+          property: RoleName
+          value: "*SSMSession*"
+        - type: exact
+          property: RoleName
+          value: "<security_scanner_role>"
 
 accounts:
   "<env_account_id>":
@@ -155,9 +194,14 @@ accounts:
       - cool-baseline
 ```
 
-**NOTE:** The filter lists above are illustrative, not exhaustive. Resource
-names and aws-nuke filter properties change over time; the authoritative way
-to tune the config is the dry run in the next section, performed on a
+**IMPORTANT:** The sample above is illustrative, NOT runnable as-is — it
+does not enumerate every Control Tower-managed resource (VPC endpoints and
+other Account Factory networking details vary by deployment), and resource
+names and aws-nuke filter properties change over time. Obtaining the
+canonical config from the DevSecOps team is a hard prerequisite of this
+runbook; if it is unavailable, STOP and open a ticket with the DevSecOps
+team rather than proceeding with the sample. The authoritative way to tune
+the canonical config is the dry run in the next section, performed on a
 freshly destroyed environment, with the DevSecOps team reviewing anything
 unexpected in the kill list.
 
@@ -194,12 +238,19 @@ unexpected in the kill list.
     ```
 
 1. Type the account alias when prompted to confirm.
-1. aws-nuke deletes in dependency-retrying passes; expect several minutes
-   and some transient errors that resolve on later passes.
+1. Expect several minutes and some transient errors as aws-nuke works
+   through resource dependencies. A single run is NOT guaranteed to remove
+   everything: a resource can fail to delete because a dependent resource
+   is removed later in the same run.
 1. When it completes, re-run the dry run from the previous section. The
    `would remove` list should now be empty — this is the verification that
-   the account is clean. Attach this final output to the
-   destroy-environment ticket.
+   the account is clean.
+    1. If the list is not empty, re-run the deletion command; resources
+       often become deletable once their dependents are gone. Repeat the
+       delete/dry-run cycle until the dry run is empty. If it stops making
+       progress, contact the DevSecOps team.
+1. Attach the final, empty dry-run output to the destroy-environment
+   ticket.
 1. Only after a clean verification run should the account be marked
    "AVAILABLE FOR USE" in the COOL environment tracking spreadsheet.
 
