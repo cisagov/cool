@@ -305,10 +305,12 @@ stack's broken one:
 
 1. If the underlying resources were already deleted out-of-band, you may
    instead retain them (valid only from the `DELETE_FAILED` state; the
-   logical IDs are listed in the stack's status reason):
+   logical IDs are listed in the stack's status reason). Keep the working
+   `--role-arn` override here too — without it, CloudFormation retries
+   with the stack's broken recorded role and fails again:
 
     ```console
-    AWS_DEFAULT_REGION=us-east-1 AWS_PROFILE=cool-env<X>-provisionaccount aws cloudformation delete-stack --stack-name <stack_name> --retain-resources <logical_id_1> <logical_id_2>
+    AWS_DEFAULT_REGION=<stack_region> AWS_PROFILE=<sanitize_profile> aws cloudformation delete-stack --stack-name <stack_name> --role-arn <admin_capable_cfn_role_arn> --retain-resources <logical_id_1> <logical_id_2>
     ```
 
 1. On newer AWS CLI versions, `--deletion-mode FORCE_DELETE_STACK` is a
