@@ -93,6 +93,14 @@ resource-types:
     - EC2VPCEndpoint
 
 presets:
+  # Retain resources the account-wide security scanner creates on its
+  # own (it tags what it generates).
+  wiz:
+    filters:
+      __global__:
+        - property: tag:wiz
+          value: "auto-gen-cmk"
+
   # Landing-zone baseline: Control Tower and IAM Identity Center.
   landing-zone:
     filters:
@@ -157,6 +165,7 @@ accounts:
     presets:
       - landing-zone
       - cool-baseline
+      - wiz
 
 # COOL Dynamic accounts do not have IAM account aliases, so aws-nuke's
 # alias safety check must be bypassed for them (pair with the
