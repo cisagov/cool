@@ -119,36 +119,38 @@ presets:
           value: "arn:aws:iam::*:saml-provider/AWSSSO_*"
 
   # COOL baseline: what the Dynamic account needs to be re-provisioned.
-  # Keep this aligned with what the cool-*-iam repos and account-wide
-  # security tooling actually create in Dynamic accounts.
+  # Everything the cool-*-iam repos and account-wide tooling create in
+  # Dynamic accounts carries the team tag; substitute the tag value your
+  # deployment applies (e.g. "<team_tag_value>").
   cool-baseline:
     filters:
-      IAMRole:
-        - "ProvisionAccount"
-        - "EC2ReadOnly"
+      __global__:
+        - property: "tag:Team"
+          value: "<team_tag_value>"
+        - property: "tag:role:Team"
+          value: "<team_tag_value>"
+      # These resources don't have tags, so they aren't covered by our
+      # __global__ filter.
+      CloudWatchEventsRule:
+        - property: Name
+          value: capture-user-group-events
+        - property: Name
+          value: disable-inactive-iam-users-every-1-day
+      CloudWatchEventsTarget:
+        - property: Name
+          value: capture-user-group-events
+        - property: Name
+          value: disable-inactive-iam-users-every-1-day
+      CloudWatchLogsLogGroup:
         - type: glob
-          value: "*SSMSession*"
-        - "<security_scanner_role>"
-      # Retaining a role is not enough: its inline policies and managed-
-      # policy attachments are separate aws-nuke resources and must be
-      # filtered too, or the sweep strips the role's permissions.
-      IAMRolePolicy:
-        - type: glob
-          property: role:RoleName
-          value: "*SSMSession*"
-      IAMRolePolicyAttachment:
-        - type: exact
-          property: RoleName
-          value: "ProvisionAccount"
-        - type: exact
-          property: RoleName
-          value: "EC2ReadOnly"
-        - type: glob
-          property: RoleName
-          value: "*SSMSession*"
-        - type: exact
-          property: RoleName
-          value: "<security_scanner_role>"
+          value: "/instance-logs/*"
+      SNSSubscription:
+        - property: TopicARN
+          type: regex
+          value: "arn:aws:sns:.*:user-or-group-modified"
+        - property: TopicARN
+          type: regex
+          value: "arn:aws:sns:.*:cloudwatch-alarms"
 
 accounts:
   "<env_account_id>":
