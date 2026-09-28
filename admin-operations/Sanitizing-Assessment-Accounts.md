@@ -86,6 +86,12 @@ blocklist:
   - "<images_account_id>"
   - "<shared_services_account_id>"
 
+# Control Tower creates one VPC endpoint, but there is no way to target
+# just the one it creates, so leave this resource type in place entirely.
+resource-types:
+  excludes:
+    - EC2VPCEndpoint
+
 presets:
   # Landing-zone baseline: Control Tower and IAM Identity Center.
   landing-zone:
