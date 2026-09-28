@@ -96,76 +96,27 @@ presets:
   # Landing-zone baseline: Control Tower and IAM Identity Center.
   landing-zone:
     filters:
-      CloudFormationStack:
-        - type: glob
-          value: "StackSet-AWSControlTower*"
-      CloudTrailTrail:
-        - type: glob
-          value: "aws-controltower*"
-      CloudWatchLogsLogGroup:
-        - type: glob
-          value: "*aws-controltower*"
-        - type: glob
-          value: "*AWSControlTower*"
-      ConfigServiceConfigurationRecorder:
-        - type: glob
-          value: "aws-controltower*"
-      ConfigServiceDeliveryChannel:
-        - type: glob
-          value: "aws-controltower*"
-      EC2DHCPOption:
-        - type: glob
-          property: tag:Name
-          value: "aws-controltower-*"
-      EC2InternetGateway:
-        - type: glob
-          property: tag:Name
-          value: "aws-controltower-*"
-      EC2RouteTable:
-        - type: glob
-          property: tag:Name
-          value: "aws-controltower-*"
-      EC2Subnet:
-        - type: glob
-          property: tag:Name
-          value: "aws-controltower-*"
-      EC2VPC:
-        - type: exact
-          property: tag:Name
-          value: "aws-controltower-VPC"
-      IAMRole:
-        - type: glob
-          value: "AWSReservedSSO_*"
-        - type: glob
-          value: "aws-controltower-*"
-        - "AWSControlTowerExecution"
-      IAMRolePolicy:
-        - type: glob
-          property: role:RoleName
-          value: "AWSReservedSSO_*"
-        - type: glob
-          property: role:RoleName
-          value: "aws-controltower-*"
-      IAMRolePolicyAttachment:
-        - type: glob
-          property: RoleName
-          value: "AWSReservedSSO_*"
-        - type: glob
-          property: RoleName
-          value: "aws-controltower-*"
-        - type: exact
-          property: RoleName
-          value: "AWSControlTowerExecution"
+      __global__:
+        - type: contains
+          value: AWSControlTower
+        - type: contains
+          value: "aws-controltower"
+        - property: "tag:aws:cloudformation:stack-name"
+          type: contains
+          value: AWSControlTower
+      # These resources don't have tags, so they aren't covered by our
+      # __global__ filter.
+      #
+      # ControlTower creates some SG rules for the default VPC that
+      # should not be destroyed.
+      EC2DefaultSecurityGroupRule:
+        - property: DefaultVPC
+          value: "true"
       # SAML providers are identified by their full ARN, so the pattern
       # must match the whole ARN, not just the provider name.
       IAMSAMLProvider:
         - type: glob
           value: "arn:aws:iam::*:saml-provider/AWSSSO_*"
-      LambdaFunction:
-        - "aws-controltower-NotificationForwarder"
-      SNSTopic:
-        - type: glob
-          value: "aws-controltower-*"
 
   # COOL baseline: what the Dynamic account needs to be re-provisioned.
   # Keep this aligned with what the cool-*-iam repos and account-wide
