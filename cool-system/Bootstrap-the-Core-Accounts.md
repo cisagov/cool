@@ -281,7 +281,50 @@ Confirm each account's SNS subscription email as it arrives.
 
 # Apply the per-account supplemental Terraform #
 
-Three core accounts need one extra root applied on top of the baseline before later phases can use them.  These are ordinary applies — no bootstrap gymnastics.
+A few core accounts need extra roots applied on top of the baseline before later phases can use them.  These are ordinary applies — no bootstrap gymnastics.
+
+## Management: organization-wide policies ##
+
+[`cisagov/cool-master-org-policies`](https://github.com/cisagov/cool-master-org-policies) manages AWS Organizations policies, such as service control policies (SCPs), that are attached to the organization root and therefore apply to every account in the organization.  Review the policies before applying them.
+
+The root applies through the management account's `ProvisionAccount` role.  `cool-accounts/master` grants that role permission to manage SCPs, but only those whose `Application` tag is `COOL - Master Org Policies`, so the SCPs that Control Tower creates cannot be modified.  Use exactly that `Application` value below; the root rejects any other value at plan time.
+
+> [!NOTE]
+> If you are adding this to an existing deployment, re-apply `cool-accounts/master` first so that `ProvisionAccount` has these permissions.
+
+```console
+cd ~/cool/src/cool-master-org-policies
+```
+
+Create `<tfvars_repo>/cool-master-org-policies/<workspace>.tfvars`:
+
+```hcl
+terraform_state_bucket = "<state_bucket>"
+
+tags = {
+  Team        = "<your_team_name>"
+  Application = "COOL - Master Org Policies"
+  Workspace   = "<workspace>"
+}
+```
+
+```console
+terraform init -upgrade \
+  -backend-config=<tfvars_repo>/cool-master-org-policies/<workspace>.tfconfig
+terraform workspace new <workspace>
+terraform apply -var-file=<tfvars_repo>/cool-master-org-policies/<workspace>.tfvars
+```
+
+Confirm that the SCPs are attached to the organization root:
+
+```console
+root_id=$(aws organizations list-roots --profile cool-master-organizationsreadonly \
+  --query 'Roots[0].Id' --output text)
+aws organizations list-policies-for-target --profile cool-master-organizationsreadonly \
+  --target-id "$root_id" --filter SERVICE_CONTROL_POLICY --query 'Policies[].Name' --output text
+```
+
+The output should include the name of every SCP that `cool-master-org-policies` defines.
 
 ## DNS: public zone ##
 
