@@ -60,6 +60,7 @@ driven by tickets:
 | [Creating SSL Certificates for Assessment Mail Servers](Creating-SSL-Certificates-for-Assessment-Mail-Servers.md) | Before provisioning environments that send email (RPT, PCA, etc.). |
 | [Archiving Assessment Data to the Analytic Enclave](Archiving-Assessment-Data-to-the-Analytic-Enclave.md) | "Awaiting Data Archive and Report" tickets at the end of an assessment. |
 | [Deleting Assessment Environments](Deleting-Assessment-Environments.md) | Environment destruction tickets after archiving is complete. |
+| [Sanitizing Assessment Accounts](Sanitizing-Assessment-Accounts.md) | Sub-task of deletion: sweep the AWS account of out-of-band resources before returning it to the pool. |
 
 ## Keeping these runbooks up to date
 
@@ -91,4 +92,4 @@ order:
 3. Environment provisioned ([provisioning](Provisioning-Assessment-Environments.md)), including the Guacamole join, HBAC update, and Nessus verification sub-tasks.
 4. Assessment runs; support tickets handled via the [troubleshooting guide](Support-and-Troubleshooting-Guide.md).
 5. Assessment data archived ([archiving](Archiving-Assessment-Data-to-the-Analytic-Enclave.md)).
-6. Environment destroyed and groups removed ([deletion](Deleting-Assessment-Environments.md)).
+6. Environment destroyed and groups removed ([deletion](Deleting-Assessment-Environments.md)), and the account swept clean before returning to the pool ([sanitizing](Sanitizing-Assessment-Accounts.md)).
