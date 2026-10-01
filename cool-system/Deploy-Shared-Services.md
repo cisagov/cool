@@ -173,6 +173,8 @@ OpenVPN needs a TLS certificate for `vpn.<cool_domain>` in `<cert_bucket>` befor
 
 1. Join the new OpenVPN instance to the FreeIPA domain: SSM into it via `cool-sharedservices-startstopssmsession`, `sudo kinit <first.last>@<COOL_DOMAIN_UPPER>`, then `sudo /usr/local/sbin/00_setup_freeipa.sh`.
 
+1. Give the OpenVPN instance permission to query user certificates against the certificate mapping data stored in FreeIPA:  SSM into it via `cool-sharedservices-startstopssmsession`, `sudo kinit <first.last>`, then `sudo /usr/local/sbin/01_setup_certmap_permissions.sh`.
+
 # Verify #
 
 * `dig +short vpn.<cool_domain>` returns a public IP.
