@@ -28,6 +28,7 @@ zone, and the per-account IAM roles that everything else assumes.
 | [`provision-aws-account`](https://github.com/cisagov/provision-aws-account) | Root config | Mints new AWS accounts via Control Tower Account Factory (used to create each `env<N>` Dynamic account). |
 | [`cool-configure-aws-account`](https://github.com/cisagov/cool-configure-aws-account) | Root config | Post-creation finishing for a new account: SSO permission-set assignments and service-quota increase requests. |
 | [`cool-master-cur`](https://github.com/cisagov/cool-master-cur) | Root config | Replicates AWS Cost & Usage Report data out of the master account for billing analysis. |
+| [`cool-master-org-policies`](https://github.com/cisagov/cool-master-org-policies) | Root config | Organization-wide AWS Organizations policies, such as service control policies (SCPs), attached to the organization root. |
 
 ---
 
