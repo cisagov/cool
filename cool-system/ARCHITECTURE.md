@@ -77,6 +77,12 @@ by [`cisagov/provision-aws-account`](https://github.com/cisagov/provision-aws-ac
 and finished by
 [`cisagov/cool-configure-aws-account`](https://github.com/cisagov/cool-configure-aws-account).
 
+Organization-wide service control policies (SCPs) beyond Control
+Tower's own guardrails are managed by
+[`cisagov/cool-master-org-policies`](https://github.com/cisagov/cool-master-org-policies)
+and attached to the organization root, so they apply to every
+account.
+
 ---
 
 ## 2. Shared-services hub ##

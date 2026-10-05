@@ -62,6 +62,7 @@ cd ~/cool/src
 git clone git@github.com:cisagov/cool-accounts.git
 git clone git@github.com:cisagov/provision-aws-account.git
 git clone git@github.com:cisagov/cool-configure-aws-account.git
+git clone git@github.com:cisagov/cool-master-org-policies.git
 git clone git@github.com:cisagov/cool-images-parameterstore.git
 git clone git@github.com:cisagov/cool-dns-certboto.git
 git clone git@github.com:cisagov/cool-dns-cyber.dhs.gov.git   # fork/rename for your own <cool_domain>
@@ -100,6 +101,7 @@ Resulting layout:
 ├── cool-dns-certboto/
 ├── cool-dns-cyber.dhs.gov/          ← fork this for your own domain
 ├── cool-images-parameterstore/
+├── cool-master-org-policies/
 ├── cool-sharedservices-freeipa/
 ├── cool-sharedservices-networking/
 ├── cool-sharedservices-openvpn/
@@ -127,7 +129,7 @@ git init
 
 mkdir -p cool-accounts/{terraform,users,master,audit,dns,images,log-archive,shared-services,dynamic}
 mkdir -p provision-aws-account cool-configure-aws-account
-mkdir -p cool-images-parameterstore cool-dns-certboto cool-dns-public
+mkdir -p cool-images-parameterstore cool-dns-certboto cool-dns-public cool-master-org-policies
 mkdir -p cool-sharedservices-networking cool-sharedservices-freeipa cool-sharedservices-openvpn
 mkdir -p cool-assessment-terraform
 ```
