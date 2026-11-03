@@ -97,7 +97,7 @@ there before deploying it to Production.
       with those accounts' profiles.
 
         ```console
-        for p in terraform users master audit dns images logarchive sharedservices $(seq -f 'env%g' 0 <last_env_number>); do
+        for p in audit dns $(seq -f 'env%g' 0 <last_env_number>) images logarchive master sharedservices terraform users; do
           printf '%-18s ' "$p"
           aws lambda update-function-code --function-name disable-inactive-iam-users \
             --s3-bucket <lambda_bucket> --s3-key disable_inactive_iam_users.zip \
@@ -122,7 +122,7 @@ there before deploying it to Production.
       same way.
 
         ```console
-        for p in terraform users master audit dns images logarchive sharedservices $(seq -f 'env%g' 0 <last_env_number>); do
+        for p in audit dns $(seq -f 'env%g' 0 <last_env_number>) images logarchive master sharedservices terraform users; do
           printf '%-18s ' "$p"
           aws lambda get-function --function-name disable-inactive-iam-users \
             --profile "cool-${p}-provisionaccount" \
