@@ -31,7 +31,7 @@ AWS Organization (Control Tower landing zone)
 │   └── Log Archive
 │
 ├── Static OU                  ── long-lived COOL core
-│   ├── Terraform              S3 + DynamoDB remote state for everything
+│   ├── Terraform              S3 + DynamoDB remote state for everything, Lambda packages
 │   ├── Users                  IAM users that assume roles everywhere else
 │   ├── DNS                    Route 53 public zones, ACME/cert bucket
 │   ├── Images                 Packer-built golden AMIs + SSM Parameter Store secrets
@@ -49,6 +49,9 @@ AWS Organization (Control Tower landing zone)
 - **Terraform** account: holds the single S3 state bucket and
   DynamoDB lock table.  Every other repo's `backend.tf` points here,
   so state is centralized and access to it can be tightly scoped.
+  It also holds the S3 bucket for Lambda deployment packages, so
+  Lambdas that run in other accounts, such as the EC2 reaper in the
+  Images account, are deployed from code stored here.
 - **Users** account: the only place IAM *users* exist.  Humans
   authenticate here (long-lived credentials + MFA) and then
   `sts:AssumeRole` into purpose-specific roles in every other
