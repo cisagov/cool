@@ -441,7 +441,7 @@ Build the deployment package and upload it to `<lambda_bucket>`:
 
 ```console
 cd ~/cool/src/ec2-reaper-lambda
-BUILD_FILE_NAME=ec2_reaper.zip docker compose up build_deployment_package
+BUILD_FILE_NAME=ec2_reaper.zip docker compose up --build build_deployment_package
 aws s3 cp ec2_reaper.zip s3://<lambda_bucket>/ \
   --profile cool-terraform-provisionaccount --region <region>
 ```

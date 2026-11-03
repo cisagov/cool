@@ -115,13 +115,11 @@ The bucket now exists; move this root's own state into it.
 
 Every `cool-accounts/*` root deploys a small Lambda that disables IAM users after a period of inactivity.  The deployment package must be in `<lambda_bucket>` before the next apply will succeed.
 
-1. Build the package (see the [`disable-inactive-iam-users-lambda` README](https://github.com/cisagov/disable-inactive-iam-users-lambda) for details; typically):
+1. Build the package (see the [`disable-inactive-iam-users-lambda` README](https://github.com/cisagov/disable-inactive-iam-users-lambda) for details):
 
     ```console
     cd ~/cool/src/disable-inactive-iam-users-lambda
-    pip install --requirement requirements.txt --target package
-    (cd package && zip -r ../disable_inactive_iam_users.zip .)
-    zip -g disable_inactive_iam_users.zip lambda_handler.py
+    BUILD_FILE_NAME=disable_inactive_iam_users.zip docker compose up --build build_deployment_package
     ```
 
 1. Upload it:
