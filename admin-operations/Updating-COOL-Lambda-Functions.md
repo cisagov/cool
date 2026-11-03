@@ -8,7 +8,7 @@ COOL instance's Lambda deployment bucket, in the Terraform account, and refers
 to the package only by its bucket and S3 key. A new release is uploaded under
 the same key, so Terraform does not see the change. This runbook updates each
 function's code directly. Later Terraform applies leave the new code in place,
-and any function created later uses the latest package in the bucket.
+and any function created afterwards uses the latest package in the bucket.
 
 | Lambda function | Source repository | Package (S3 key) | Deployed in |
 |---|---|---|---|
