@@ -60,6 +60,7 @@ driven by tickets:
 | [Creating SSL Certificates for Assessment Mail Servers](Creating-SSL-Certificates-for-Assessment-Mail-Servers.md) | Before provisioning environments that send email (RPT, PCA, etc.). |
 | [Archiving Assessment Data to the Analytic Enclave](Archiving-Assessment-Data-to-the-Analytic-Enclave.md) | "Awaiting Data Archive and Report" tickets at the end of an assessment. |
 | [Deleting Assessment Environments](Deleting-Assessment-Environments.md) | Environment destruction tickets after archiving is complete. |
+| [Updating COOL Lambda Functions](Updating-COOL-Lambda-Functions.md) | A new release of a COOL Lambda function, such as `disable-inactive-iam-users-lambda` or `ec2-reaper-lambda`, needs to be deployed. |
 
 ## Keeping these runbooks up to date
 
