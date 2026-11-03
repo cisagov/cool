@@ -427,6 +427,61 @@ role_session_name = <first.last>
 region = <region>
 ```
 
+## Images: EC2 reaper ##
+
+[`cisagov/cool-images-ec2-reaper`](https://github.com/cisagov/cool-images-ec2-reaper) deploys the [`cisagov/ec2-reaper-lambda`](https://github.com/cisagov/ec2-reaper-lambda) Lambda in the Images account.  By default, it runs every 4 hours and terminates instances, in every enabled region, that are more than 24 hours old.  Set `lambda_schedule_interval` and `max_age_hours` to change those values.  These are normally instances left behind by Packer builds, such as the ones in the next phase, that failed to clean up after themselves.  Instances with termination protection enabled are skipped.  Whenever a run terminates or skips an instance, or hits an error, the Lambda emails a summary to the Images account's email address.
+
+> [!WARNING]
+> Any other instance in the Images account that is older than the maximum age is terminated too.  Enable termination protection on any instance that must be kept, or see the `cool-images-ec2-reaper` README for the inputs that change what is terminated.
+
+> [!NOTE]
+> If you are adding this to an existing deployment, re-apply `cool-accounts/images` first so that its `ProvisionAccount` role can manage the Lambda's event invoke configuration.
+
+Build the deployment package and upload it to `<lambda_bucket>`:
+
+```console
+cd ~/cool/src/ec2-reaper-lambda
+BUILD_FILE_NAME=ec2_reaper.zip docker compose up build_deployment_package
+aws s3 cp ec2_reaper.zip s3://<lambda_bucket>/ \
+  --profile cool-terraform-provisionaccount --region <region>
+```
+
+```console
+cd ~/cool/src/cool-images-ec2-reaper
+```
+
+Create `<tfvars_repo>/cool-images-ec2-reaper/<workspace>.tfvars`.  Start with `dry_run = true`, so that the Lambda only reports what it would terminate.  The first run happens within a few minutes of the first apply.
+
+```hcl
+dry_run                = true
+lambda_bucket_name     = "<lambda_bucket>"
+lambda_key             = "ec2_reaper.zip"
+terraform_state_bucket = "<state_bucket>"
+
+tags = {
+  Team        = "<your_team_name>"
+  Application = "COOL - Images EC2 Reaper"
+  Workspace   = "<workspace>"
+}
+```
+
+```console
+terraform init -upgrade \
+  -backend-config=<tfvars_repo>/cool-images-ec2-reaper/<workspace>.tfconfig
+terraform workspace new <workspace>
+terraform apply -var-file=<tfvars_repo>/cool-images-ec2-reaper/<workspace>.tfvars
+```
+
+Confirm the SNS subscription email that arrives at the Images account's email address; no summaries are emailed until you do.  A run with nothing to report sends no email.  The `/aws/lambda/ec2-reaper` CloudWatch log group has the output of every run, including any that happened before you confirmed the subscription.
+
+Once the dry runs report what you expect, set `dry_run = false` and apply again:
+
+```console
+terraform apply -var-file=<tfvars_repo>/cool-images-ec2-reaper/<workspace>.tfvars
+```
+
+This doesn't reset the schedule, so the first run that terminates instances is the next scheduled one.
+
 # Verify #
 
 Every permanent profile should now resolve.  Spot-check:
