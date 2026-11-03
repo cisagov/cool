@@ -70,6 +70,8 @@ Live in the **Images** account.
 | [`cool-images-assessment-images`](https://github.com/cisagov/cool-images-assessment-images) | Root config | S3 storage and access roles for assessment-produced disk images / artifacts. |
 | [`cool-images-vmimport`](https://github.com/cisagov/cool-images-vmimport) | Root config | The AWS `vmimport` service role, required to import VM images as AMIs. |
 | [`cool-windows-ami-sharing`](https://github.com/cisagov/cool-windows-ami-sharing) | Root config | Shares Windows AMI launch permissions with every Dynamic account. |
+| [`cool-images-ec2-reaper`](https://github.com/cisagov/cool-images-ec2-reaper) | Root config | Deploys the EC2 reaper Lambda on a schedule, along with the SNS topic that emails its summaries to the Images account's email address. |
+| [`ec2-reaper-lambda`](https://github.com/cisagov/ec2-reaper-lambda) | Lambda | Terminates instances that have existed longer than a configurable maximum age, such as those left behind by failed Packer builds.  It runs in the Images account, but its deployment package is stored in the Terraform account's Lambda bucket. |
 
 ---
 
