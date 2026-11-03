@@ -105,17 +105,33 @@ there before deploying it to Production.
         done
         ```
 
-1. Confirm that each update finished. The status is `InProgress` for a few
-   seconds after an update and should then be `Successful`:
+1. Confirm that each update finished. Each command prints the update's
+   status, followed by the function's `CodeSha256`. The status is
+   `InProgress` for a few seconds after an update and should then be
+   `Successful`.
+    - `ec2-reaper`:
 
-    ```console
-    aws lambda get-function --function-name <function_name> \
-      --profile cool-<account>-provisionaccount \
-      --query 'Configuration.[LastUpdateStatus,CodeSha256]' --output text
-    ```
+        ```console
+        aws lambda get-function --function-name ec2-reaper \
+          --profile cool-images-provisionaccount \
+          --query 'Configuration.[LastUpdateStatus,CodeSha256]' --output text
+        ```
 
-    If the status is `Failed`, the function keeps running its previous code.
-    Check `Configuration.LastUpdateStatusReason` for the cause.
+    - `disable-inactive-iam-users`: use the same `<last_env_number>` as in
+      the previous step, and check any User Services or CyHy accounts the
+      same way.
+
+        ```console
+        for p in terraform users master audit dns images logarchive sharedservices $(seq -f 'env%g' 0 <last_env_number>); do
+          printf '%-18s ' "$p"
+          aws lambda get-function --function-name disable-inactive-iam-users \
+            --profile "cool-${p}-provisionaccount" \
+            --query 'Configuration.[LastUpdateStatus,CodeSha256]' --output text
+        done
+        ```
+
+    If a status is `Failed`, that function keeps running its previous code.
+    Check its `Configuration.LastUpdateStatusReason` for the cause.
 1. Remove the package and return the source repository to its default branch:
 
     ```console
