@@ -65,7 +65,10 @@ AWS Organization (Control Tower landing zone)
   secrets (FreeIPA admin password, OpenVPN TLS key, etc.) live in SSM
   Parameter Store.  AMIs are built once here and **shared** (via
   launch permissions and a shared KMS key) into every Dynamic
-  account.
+  account.  A scheduled Lambda, deployed by
+  [`cisagov/cool-images-ec2-reaper`](https://github.com/cisagov/cool-images-ec2-reaper),
+  terminates instances that have existed longer than a configurable
+  maximum age, such as those left behind by failed Packer builds.
 - **Shared Services** account: the network and identity hub
   (described below).
 - **Dynamic / `env<N>`** accounts: each assessment gets its own AWS
