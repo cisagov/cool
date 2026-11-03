@@ -88,13 +88,16 @@ there before deploying it to Production.
           --profile cool-images-provisionaccount --query CodeSha256 --output text
         ```
 
-    - `disable-inactive-iam-users`: replace `env<X>` with every environment
-      account in the instance (e.g. `env0 env1 env2`). For any User Services
-      or CyHy accounts, run the same `aws lambda update-function-code`
-      command with those accounts' profiles.
+    - `disable-inactive-iam-users`: replace `<last_env_number>` with the
+      number of the instance's highest-numbered environment account (e.g.
+      `11`), so that `seq` lists `env0` through `env11`. If any environment
+      numbers in that range don't exist, list the environment accounts
+      explicitly instead (e.g. `env0 env2 env3`). For any User Services or
+      CyHy accounts, run the same `aws lambda update-function-code` command
+      with those accounts' profiles.
 
         ```console
-        for p in terraform users master audit dns images logarchive sharedservices env<X>; do
+        for p in terraform users master audit dns images logarchive sharedservices $(seq -f 'env%g' 0 <last_env_number>); do
           printf '%-18s ' "$p"
           aws lambda update-function-code --function-name disable-inactive-iam-users \
             --s3-bucket <lambda_bucket> --s3-key disable_inactive_iam_users.zip \
