@@ -119,7 +119,7 @@ Every `cool-accounts/*` root deploys a small Lambda that disables IAM users afte
 
     ```console
     cd ~/cool/src/disable-inactive-iam-users-lambda
-    BUILD_FILE_NAME=disable_inactive_iam_users.zip docker compose up build_deployment_package
+    BUILD_FILE_NAME=disable_inactive_iam_users.zip docker compose up --build build_deployment_package
     ```
 
 1. Upload it:
