@@ -211,7 +211,19 @@ name of the environment you are deleting (e.g. `env0-production`).
    `Sanitize file at end of assessment.`
 1. Click Commit Changes.
 
-## 6. Closeout tasks
+## 6. Sweep the AWS account
+
+`terraform destroy` removes only what Terraform created. Anything created
+out-of-band — console experiments, CloudFormation/CDK stacks,
+terraformer-provisioned leftovers, runtime artifacts such as the
+`/instance-logs/*` CloudWatch log groups — survives it and must be swept
+before the account returns to the pool.
+
+1. Sanitize the account by following
+   [Sanitizing Assessment Accounts](Sanitizing-Assessment-Accounts.md),
+   through its final clean verification run.
+
+## 7. Closeout tasks
 
 1. In the COOL environment tracking spreadsheet, replace the status in the
    Current Uses column with "AVAILABLE FOR USE" and make the cell color white
